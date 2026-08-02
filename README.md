@@ -1,5 +1,7 @@
 # MAZE STRIKE
 
+[Demo URL](https://drone-game-demo.suitylab.com) | [SUITY Agentic Project](https://github.com/suitylab/Suity)
+
 > **This game are fully generated with SUITY Agentic, using DeepSeek V4 Flash.**
 
 **MAZE STRIKE** is a top-down third-person shooter built with **TypeScript + Vite + THREE.js**. You pilot an advanced combat drone through a procedurally generated, high-tech military maze — hunting hostile mech units, scavenging powerful weapons, and fighting colossal bosses across **10 escalating levels**. Every visual element, from the neon-lit corridors to the muzzle flash of your plasma rifle, is rendered procedurally in real time.

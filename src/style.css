@@ -1,0 +1,117 @@
+/* ============================================
+   MAZE STRIKE — Global Stylesheet
+   Military/Sci-Fi HUD Aesthetic
+   ============================================ */
+
+/* ---------- Base Reset & Document ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #0a0e14;
+  font-family: 'Courier New', monospace;
+}
+
+/* ---------- 3D Canvas Container ---------- */
+/* All UI overlays are appended programmatically with inline styles */
+#app {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+}
+
+/* ---------- Global Scanline Overlay Effect ---------- */
+/* Subtle CRT-style scanlines across the entire viewport */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 255, 255, 0.03) 0px,
+    rgba(0, 255, 255, 0.03) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+/* ============================================
+   Keyframe Animations
+   Referenced by programmatically-built UI components
+   ============================================ */
+
+/* ---------- Main Menu Title Glow ---------- */
+@keyframes maze-strike-title-glow {
+  0% {
+    text-shadow: 0 0 20px rgba(0, 255, 204, 0.8), 0 0 40px rgba(0, 255, 204, 0.4);
+  }
+  100% {
+    text-shadow: 0 0 30px rgba(0, 255, 204, 1.0), 0 0 60px rgba(0, 255, 204, 0.6);
+  }
+}
+
+/* ---------- Level Select Title Glow ---------- */
+@keyframes level-select-title-glow {
+  0% {
+    text-shadow: 0 0 20px rgba(0, 255, 204, 0.8), 0 0 40px rgba(0, 255, 204, 0.4);
+  }
+  100% {
+    text-shadow: 0 0 30px rgba(0, 255, 204, 1.0), 0 0 60px rgba(0, 255, 204, 0.6);
+  }
+}
+
+/* ---------- UI Overlay Title Glow (Pause, Level Complete, etc.) ---------- */
+@keyframes ui-title-glow {
+  0% {
+    text-shadow: 0 0 20px rgba(0, 255, 204, 0.8), 0 0 40px rgba(0, 255, 204, 0.4);
+  }
+  100% {
+    text-shadow: 0 0 30px rgba(0, 255, 204, 1.0), 0 0 60px rgba(0, 255, 204, 0.6);
+  }
+}
+
+/* ---------- Reload Indicator Pulse ---------- */
+@keyframes reload-pulse {
+  0% {
+    opacity: 0.6;
+    text-shadow: 0 0 6px rgba(255, 68, 68, 0.8), 0 0 12px rgba(255, 68, 68, 0.4);
+  }
+  100% {
+    opacity: 1.0;
+    text-shadow: 0 0 12px rgba(255, 68, 68, 1.0), 0 0 24px rgba(255, 68, 68, 0.6);
+  }
+}
+
+/* ---------- Kill Feed Entry Fade-In ---------- */
+@keyframes kill-feed-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ---------- Main Menu Scanline Move ---------- */
+@keyframes maze-strike-scanline-move {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 100px;
+  }
+}

@@ -128,7 +128,7 @@ export default class Game {
   private readonly maxPlayerHealth: number = 100;
 
   /** Player armor (100 max) */
-  private playerArmor: number = 0;
+  private playerArmor: number = 100;
 
   /** Player max armor */
   private readonly maxPlayerArmor: number = 100;
@@ -252,7 +252,7 @@ export default class Game {
     // Initialize HUD with initial values
     this.playerHealth = 100;
     this.hud.updateHealth(100, 100);
-    this.hud.updateArmor(0, 0);
+    this.hud.updateArmor(100, 100);
     this.hud.updateWeapon('M9 SIDEARM', 12, 48);
     this.hud.updateEnemyCount(0);
     this.hud.updateLevel(1);
@@ -1470,7 +1470,7 @@ export default class Game {
     this.hud.updateHealth(this.playerHealth, this.maxPlayerHealth);
 
     // Reset player armor
-    this.playerArmor = 0;
+    this.playerArmor = this.maxPlayerArmor;
     this.hud.updateArmor(this.playerArmor, this.maxPlayerArmor);
 
     // Respawn drone (re-add to scene if previously exploded)

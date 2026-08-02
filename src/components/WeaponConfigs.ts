@@ -167,7 +167,7 @@ export const WEAPON_CONFIGS: WeaponConfig[] = [
   {
     id: WEAPON_IDS.TITAN_SHOTGUN,
     name: 'TITAN SHOTGUN',
-    damage: 25, // Per pellet (8 pellets = 200 max damage)
+    damage: 25, // Per pellet (4 pellets = 100 max damage)
     fireRateRPM: 60,
     magazineSize: 6,
     reserveAmmo: 24,
@@ -177,7 +177,7 @@ export const WEAPON_CONFIGS: WeaponConfig[] = [
     isShotgun: true,
     isRocket: false,
     isPlasma: false,
-    pelletCount: 8,
+    pelletCount: 4,
     spreadAngle: 12, // Degrees of total spread
     explosionRadius: 0,
     reloadTime: 2.5,

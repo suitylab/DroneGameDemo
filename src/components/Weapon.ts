@@ -815,6 +815,14 @@ export default class Weapon {
   }
 
   /**
+   * Completely fills both magazine and reserve ammo to maximum.
+   */
+  public fillAmmo(): void {
+    this.magazineAmmo = this.config.magazineSize;
+    this.reserveAmmo = this.config.reserveAmmo;
+  }
+
+  /**
    * Gets the weapon configuration.
    * @returns The weapon config object
    */

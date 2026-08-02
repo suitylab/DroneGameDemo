@@ -62,6 +62,10 @@ export default class WeaponInventory {
   public addWeapon(config: WeaponConfig): boolean {
     // Check if this weapon is already owned
     if (this.hasWeapon(config.id)) {
+      const weapon = this.weapons.find((w) => w.getConfig().id === config.id);
+      if (weapon) {
+        weapon.fillAmmo();
+      }
       return false;
     }
 

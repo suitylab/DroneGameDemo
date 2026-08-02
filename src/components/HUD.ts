@@ -63,6 +63,9 @@ export default class HUD {
   /** Reload indicator element */
   private reloadIndicator: HTMLDivElement;
 
+  /** Reload progress bar fill element */
+  private reloadBarFill: HTMLDivElement;
+
   /** Objective notification element */
   private objectiveNotification: HTMLDivElement;
 
@@ -498,12 +501,11 @@ export default class HUD {
    */
   private buildReloadIndicator(): void {
     this.reloadIndicator = document.createElement('div');
-    this.reloadIndicator.textContent = 'RELOADING';
     this.reloadIndicator.style.cssText = `
       position: absolute;
       bottom: 80px;
       right: 24px;
-      font-size: 18px;
+      font-size: 14px;
       color: #ff4444;
       text-shadow: 0 0 6px rgba(255, 68, 68, 0.8), 0 0 12px rgba(255, 68, 68, 0.4);
       background: rgba(10, 14, 20, 0.85);
@@ -513,10 +515,41 @@ export default class HUD {
       letter-spacing: 3px;
       z-index: 10;
       display: none;
-      animation: reload-pulse 1s ease-in-out infinite alternate;
       backdrop-filter: blur(2px);
       -webkit-backdrop-filter: blur(2px);
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
     `;
+
+    // Reload text
+    const label = document.createElement('div');
+    label.textContent = 'RELOADING';
+    this.reloadIndicator.appendChild(label);
+
+    // Progress bar container
+    const barContainer = document.createElement('div');
+    barContainer.style.cssText = `
+      width: 120px;
+      height: 6px;
+      background: rgba(255, 68, 68, 0.2);
+      border-radius: 3px;
+      overflow: hidden;
+    `;
+
+    // Progress bar fill
+    this.reloadBarFill = document.createElement('div');
+    this.reloadBarFill.style.cssText = `
+      width: 0%;
+      height: 100%;
+      background: #ff4444;
+      border-radius: 3px;
+      transition: width 0.05s linear;
+      box-shadow: 0 0 6px rgba(255, 68, 68, 0.6);
+    `;
+    barContainer.appendChild(this.reloadBarFill);
+    this.reloadIndicator.appendChild(barContainer);
+
     this.root.appendChild(this.reloadIndicator);
   }
 
@@ -810,6 +843,17 @@ export default class HUD {
   public hideReloadIndicator(): void {
     if (this.disposed) return;
     this.reloadIndicator.style.display = 'none';
+    this.reloadBarFill.style.width = '0%';
+  }
+
+  /**
+   * Updates the reload progress bar.
+   * @param progress - Reload progress from 0 to 1
+   */
+  public updateReloadProgress(progress: number): void {
+    if (this.disposed) return;
+    const clamped = Math.max(0, Math.min(1, progress));
+    this.reloadBarFill.style.width = `${clamped * 100}%`;
   }
 
   /**

@@ -1061,7 +1061,7 @@ export default class Game {
           moveDirection,
           mouseWorldPosition,
           this.camera,
-          this.introComplete ? this.mazeRenderer.isWalkable.bind(this.mazeRenderer) : null
+          this.introComplete && this.mazeRenderer ? this.mazeRenderer.isWalkable.bind(this.mazeRenderer) : null
         );
 
                         // Update drone death explosion particles (if exploded)
@@ -1166,9 +1166,10 @@ export default class Game {
         );
       }
 
-      // Show/hide reload indicator
+      // Show/hide reload indicator and update progress
       if (this.inventory.isReloading()) {
         this.hud.showReloadIndicator();
+        this.hud.updateReloadProgress(this.inventory.getReloadProgress());
       } else {
         this.hud.hideReloadIndicator();
       }

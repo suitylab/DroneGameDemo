@@ -141,6 +141,48 @@ interface DeathParticle {
 }
 
 /**
+ * SmokeParticle
+ *
+ * A dark smoke particle spawned during death explosion.
+ * Rises upward and expands while fading out.
+ */
+interface SmokeParticle {
+  /** The visible mesh for the particle */
+  mesh: THREE.Mesh;
+  /** The material (for opacity fading) */
+  material: THREE.MeshStandardMaterial;
+  /** The velocity vector (units per second) */
+  velocity: THREE.Vector3;
+  /** Current life remaining (seconds) */
+  life: number;
+  /** Maximum life (seconds) */
+  maxLife: number;
+  /** Scale growth rate per second */
+  scaleGrowth: number;
+}
+
+/**
+ * ShockwaveRing
+ *
+ * An expanding ring effect spawned during death explosion.
+ * Grows outward while fading out.
+ */
+interface ShockwaveRing {
+  /** The visible mesh for the ring */
+  mesh: THREE.Mesh;
+  /** The material (for opacity fading) */
+  material: THREE.MeshBasicMaterial;
+  /** Current life remaining (seconds) */
+  life: number;
+  /** Maximum life (seconds) */
+  maxLife: number;
+  /** Expansion speed (units per second) */
+  expandSpeed: number;
+  /** Whether this ring is vertical (standing upright) */
+  vertical: boolean;
+}
+
+/**
  * ShockwaveEffect
  *
  * A ring mesh that expands outward and fades (phase transition effect).
@@ -303,8 +345,26 @@ export default abstract class Boss {
   /** Collision radius for movement checks */
   protected readonly collisionRadius: number = 1.5;
 
-  /** Shared geometry for death particles (disposed when effect expires) */
+    /** Shared geometry for death particles (disposed when effect expires) */
   protected deathParticleGeometry: THREE.BufferGeometry | null = null;
+
+  /** Active smoke particles for death explosion */
+  protected smokeParticles: SmokeParticle[] = [];
+
+  /** Active shockwave rings for death explosion */
+  protected shockwaveRings: ShockwaveRing[] = [];
+
+  /** Smoke particle duration in seconds */
+    protected smokeDuration: number = 3.0;
+
+  /** Shockwave ring duration in seconds */
+    protected shockwaveDuration: number = 1.5;
+
+  /** Shared geometry for smoke particles */
+  protected smokeGeometry: THREE.BufferGeometry | null = null;
+
+  /** Shared geometry for shockwave rings */
+  protected shockwaveRingGeometry: THREE.BufferGeometry | null = null;
 
   /** Shared geometry for shockwave rings */
   protected shockwaveGeometry: THREE.BufferGeometry | null = null;
@@ -780,7 +840,7 @@ export default abstract class Boss {
 
     // --- Spawn Explosion Particles ---
     const particleCount = 30 + Math.floor(Math.random() * 21); // 30-50
-    const particleGeometry = new THREE.TetrahedronGeometry(0.15);
+        const particleGeometry = new THREE.TetrahedronGeometry(0.2);
     this.deathParticleGeometry = particleGeometry;
 
     for (let i = 0; i < particleCount; i++) {
@@ -792,7 +852,7 @@ export default abstract class Boss {
       ).normalize();
 
       // Random speed (faster for boss)
-      const speed = 6 + Math.random() * 8;
+            const speed = 4 + Math.random() * 5;
 
       // Create material with config explosion color
       const material = new THREE.MeshStandardMaterial({
@@ -825,15 +885,174 @@ export default abstract class Boss {
 
       this.scene.add(particle);
 
-      this.deathParticles.push({
+            this.deathParticles.push({
         mesh: particle,
         material,
         velocity,
         rotationVelocity,
-        life: this.deathDuration,
-        maxLife: this.deathDuration,
+                life: this.deathDuration * 1.5,
+        maxLife: this.deathDuration * 1.5,
       });
     }
+
+    // --- Spawn Spark Particles ---
+    const sparkCount = 40 + Math.floor(Math.random() * 21); // 40-60
+        const sparkGeometry = new THREE.TetrahedronGeometry(0.09);
+
+    for (let i = 0; i < sparkCount; i++) {
+      // Random direction (wider spread, less upward bias)
+      const direction = new THREE.Vector3(
+        Math.random() * 2 - 1,
+        Math.random() * 0.6 + 0.1,
+        Math.random() * 2 - 1
+      ).normalize();
+
+      // Higher speed for sparks
+            const speed = 7 + Math.random() * 6;
+
+      // Bright orange-yellow-white spark material
+      const sparkRoll = Math.random();
+      const sparkColor = sparkRoll < 0.4 ? 0xff8800 : (sparkRoll < 0.75 ? 0xffcc00 : 0xffffff);
+      const material = new THREE.MeshStandardMaterial({
+        color: sparkColor,
+        emissive: sparkColor,
+        emissiveIntensity: 8.0,
+        transparent: true,
+        opacity: 1.0,
+        roughness: 0.2,
+        metalness: 0.1,
+      });
+
+      const spark = new THREE.Mesh(sparkGeometry, material);
+      spark.position.copy(this.group.position);
+      spark.position.y += this.config.height * this.config.scale * 0.5;
+
+      const velocity = direction.multiplyScalar(speed);
+
+      this.scene.add(spark);
+
+      this.deathParticles.push({
+        mesh: spark,
+        material,
+        velocity,
+        rotationVelocity: new THREE.Vector3(
+          (Math.random() - 0.5) * 20,
+          (Math.random() - 0.5) * 20,
+          (Math.random() - 0.5) * 20
+        ),
+                life: 0.5 + Math.random() * 0.4, // 0.5-0.9s
+        maxLife: 0.5 + Math.random() * 0.4,
+      });
+    }
+
+    // --- Spawn Smoke Particles ---
+    const smokeCount = 20 + Math.floor(Math.random() * 11); // 20-30
+    const smokeGeom = new THREE.SphereGeometry(0.15, 8, 8);
+    this.smokeGeometry = smokeGeom;
+
+    for (let i = 0; i < smokeCount; i++) {
+      // Slight random offset from center
+      const offset = new THREE.Vector3(
+        (Math.random() - 0.5) * 0.6,
+        Math.random() * 0.3,
+        (Math.random() - 0.5) * 0.6
+      );
+
+      // Slow upward drift
+            const velocity = new THREE.Vector3(
+        Math.random() * 1.2,
+        0.8 + Math.random() * 1.2,
+        Math.random() * 1.2
+      );
+
+      // Dark smoke material
+      const material = new THREE.MeshStandardMaterial({
+        color: 0x1a1a1a,
+        emissive: 0x111111,
+        emissiveIntensity: 0.3,
+        transparent: true,
+        opacity: 0.8,
+        roughness: 1.0,
+        metalness: 0.0,
+        depthWrite: false,
+      });
+
+      const smoke = new THREE.Mesh(smokeGeom, material);
+      smoke.position.copy(this.group.position);
+      smoke.position.y += this.config.height * this.config.scale * 0.5;
+      smoke.position.add(offset);
+            smoke.scale.setScalar(2.0 + Math.random() * 1.0);
+      smoke.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+
+      this.scene.add(smoke);
+
+      this.smokeParticles.push({
+        mesh: smoke,
+        material,
+        velocity,
+        life: this.smokeDuration,
+        maxLife: this.smokeDuration,
+        scaleGrowth: 0.8 + Math.random() * 0.7,
+      });
+    }
+
+    // --- Spawn Shockwave Rings ---
+    const ringGeom = new THREE.RingGeometry(0.05, 0.6, 32);
+    this.shockwaveRingGeometry = ringGeom;
+    const centerPos = this.group.position.clone();
+    centerPos.y += this.config.height * this.config.scale * 0.5;
+
+    for (let i = 0; i < 3; i++) {
+      const material = new THREE.MeshBasicMaterial({
+        color: this.config.explosionColor,
+        transparent: true,
+        opacity: 0.9,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      });
+
+      const ring = new THREE.Mesh(ringGeom, material);
+      ring.position.copy(centerPos);
+      ring.position.y = 0.15; // Ground level with slight offset
+      ring.rotation.x = -Math.PI / 2; // Lay flat on ground
+
+      this.scene.add(ring);
+
+      this.shockwaveRings.push({
+        mesh: ring,
+        material,
+        life: this.shockwaveDuration,
+        maxLife: this.shockwaveDuration,
+                expandSpeed: 7 + i * 3, // Each ring slightly faster
+        vertical: false,
+      });
+    }
+
+    // --- Spawn Vertical Shockwave Ring ---
+    const verticalMaterial = new THREE.MeshBasicMaterial({
+      color: this.config.explosionColor,
+      transparent: true,
+      opacity: 0.9,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
+
+    const verticalRing = new THREE.Mesh(ringGeom, verticalMaterial);
+    verticalRing.position.copy(centerPos);
+    // No rotation - stands upright
+
+    this.scene.add(verticalRing);
+
+    this.shockwaveRings.push({
+      mesh: verticalRing,
+      material: verticalMaterial,
+      life: this.shockwaveDuration,
+      maxLife: this.shockwaveDuration,
+            expandSpeed: 12,
+      vertical: true,
+    });
 
     // --- Spawn Bright Light Flash ---
     const light = new THREE.PointLight(this.config.explosionColor, 15, 20);
@@ -974,20 +1193,94 @@ export default abstract class Boss {
       particle.mesh.rotation.y += particle.rotationVelocity.y * deltaTime;
       particle.mesh.rotation.z += particle.rotationVelocity.z * deltaTime;
 
-      // Fade opacity
+            // Fade opacity
       const ratio = particle.life / particle.maxLife;
       particle.material.opacity = ratio;
     }
 
+    // --- Update smoke particles ---
+    for (let i = this.smokeParticles.length - 1; i >= 0; i--) {
+      const smoke = this.smokeParticles[i];
+      smoke.life -= deltaTime;
+
+      if (smoke.life <= 0) {
+        this.scene.remove(smoke.mesh);
+        smoke.mesh.geometry.dispose();
+        smoke.material.dispose();
+        this.smokeParticles.splice(i, 1);
+        continue;
+      }
+
+      // Apply gentle gravity reduction (smoke rises then slows)
+      if (smoke.velocity.y > 0) {
+        smoke.velocity.y -= 0.8 * deltaTime;
+      }
+
+      // Update position
+      smoke.mesh.position.add(smoke.velocity.clone().multiplyScalar(deltaTime));
+
+      // Expand smoke volume over time
+      const scaleIncrement = smoke.scaleGrowth * deltaTime;
+      smoke.mesh.scale.x += scaleIncrement;
+      smoke.mesh.scale.y += scaleIncrement;
+      smoke.mesh.scale.z += scaleIncrement;
+
+      // Fade opacity — smoke lingers longer before fading
+      const smokeRatio = smoke.life / smoke.maxLife;
+      smoke.material.opacity = smokeRatio * 0.8;
+    }
+
+    // --- Update shockwave rings ---
+    for (let i = this.shockwaveRings.length - 1; i >= 0; i--) {
+      const ring = this.shockwaveRings[i];
+      ring.life -= deltaTime;
+
+      if (ring.life <= 0) {
+        this.scene.remove(ring.mesh);
+        ring.mesh.geometry.dispose();
+        ring.material.dispose();
+        this.shockwaveRings.splice(i, 1);
+        continue;
+      }
+
+      // Expand ring outward
+      const expandAmount = ring.expandSpeed * deltaTime;
+      if (ring.vertical) {
+        ring.mesh.scale.x += expandAmount;
+        ring.mesh.scale.z += expandAmount;
+      } else {
+        ring.mesh.scale.x += expandAmount;
+        ring.mesh.scale.y += expandAmount;
+        ring.mesh.scale.z += expandAmount;
+      }
+
+      // Fade opacity
+      const ringRatio = ring.life / ring.maxLife;
+      ring.material.opacity = ringRatio * 0.9;
+    }
+
     // Update death light
     if (this.deathLight) {
-      const ratio = this.deathParticles.length > 0
-        ? this.deathParticles[0].life / this.deathParticles[0].maxLife
-        : 0;
+      const allEffectLife = Math.max(
+        this.deathParticles.length > 0 ? this.deathParticles[0].life : 0,
+        this.smokeParticles.length > 0 ? this.smokeParticles[0].life : 0,
+        this.shockwaveRings.length > 0 ? this.shockwaveRings[0].life : 0
+      );
+      const allMaxLife = Math.max(
+        this.deathParticles.length > 0 ? this.deathParticles[0].maxLife : 0,
+        this.smokeParticles.length > 0 ? this.smokeParticles[0].maxLife : 0,
+        this.shockwaveRings.length > 0 ? this.shockwaveRings[0].maxLife : 0
+      );
+      const ratio = allMaxLife > 0 ? allEffectLife / allMaxLife : 0;
       this.deathLight.intensity = 15 * ratio;
 
-      // Remove light when all particles are gone
-      if (this.deathParticles.length === 0) {
+      // Remove light when all effects are gone
+      const allDone =
+        this.deathParticles.length === 0 &&
+        this.smokeParticles.length === 0 &&
+        this.shockwaveRings.length === 0;
+
+      if (allDone) {
         this.scene.remove(this.deathLight);
         this.deathLight.dispose();
         this.deathLight = null;
@@ -996,6 +1289,14 @@ export default abstract class Boss {
         if (this.deathParticleGeometry) {
           this.deathParticleGeometry.dispose();
           this.deathParticleGeometry = null;
+        }
+        if (this.smokeGeometry) {
+          this.smokeGeometry.dispose();
+          this.smokeGeometry = null;
+        }
+        if (this.shockwaveRingGeometry) {
+          this.shockwaveRingGeometry.dispose();
+          this.shockwaveRingGeometry = null;
         }
       }
     }
@@ -1149,13 +1450,29 @@ export default abstract class Boss {
       this.healthBarSprite = null;
     }
 
-    // Dispose active death particles
+        // Dispose active death particles
     for (const particle of this.deathParticles) {
       this.scene.remove(particle.mesh);
       particle.mesh.geometry.dispose();
       particle.material.dispose();
     }
     this.deathParticles = [];
+
+    // Dispose active smoke particles
+    for (const smoke of this.smokeParticles) {
+      this.scene.remove(smoke.mesh);
+      smoke.mesh.geometry.dispose();
+      smoke.material.dispose();
+    }
+    this.smokeParticles = [];
+
+    // Dispose active shockwave rings
+    for (const ring of this.shockwaveRings) {
+      this.scene.remove(ring.mesh);
+      ring.mesh.geometry.dispose();
+      ring.material.dispose();
+    }
+    this.shockwaveRings = [];
 
     // Dispose death light
     if (this.deathLight) {
@@ -1164,10 +1481,22 @@ export default abstract class Boss {
       this.deathLight = null;
     }
 
-    // Dispose shared particle geometry
+        // Dispose shared particle geometry
     if (this.deathParticleGeometry) {
       this.deathParticleGeometry.dispose();
       this.deathParticleGeometry = null;
+    }
+
+    // Dispose shared smoke geometry
+    if (this.smokeGeometry) {
+      this.smokeGeometry.dispose();
+      this.smokeGeometry = null;
+    }
+
+    // Dispose shared shockwave ring geometry
+    if (this.shockwaveRingGeometry) {
+      this.shockwaveRingGeometry.dispose();
+      this.shockwaveRingGeometry = null;
     }
 
     // Dispose active shockwaves

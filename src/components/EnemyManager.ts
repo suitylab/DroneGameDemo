@@ -196,9 +196,17 @@ export default class EnemyManager {
       // Update the enemy
       enemy.update(deltaTime);
 
-      // Remove dead enemies (dispose happens in onEnemyDeath)
+      // Remove dead enemies only after all death effects are complete
       if (!enemy.getIsAlive()) {
-        this.enemies.splice(i, 1);
+        const hasActiveEffects =
+          enemy.deathParticles.length > 0 ||
+          enemy.smokeParticles.length > 0 ||
+          enemy.shockwaveRings.length > 0 ||
+          enemy.deathLight !== null;
+        if (!hasActiveEffects) {
+          enemy.dispose();
+          this.enemies.splice(i, 1);
+        }
       }
     }
 
@@ -385,16 +393,12 @@ export default class EnemyManager {
     const pos = enemy.getPosition();
     this.onEnemyPositionDeath(pos.x, pos.z);
 
-    // Find and remove the enemy from the array
-    const index = this.enemies.indexOf(enemy);
-    if (index !== -1) {
-      // Dispose the enemy (removes from scene and cleans up resources)
-      enemy.dispose();
-      this.enemies.splice(index, 1);
-    }
-
     // Update the enemy counter
     this.updateEnemyCounter();
+
+    // Note: Do NOT dispose the enemy here.
+    // The update loop will keep it alive until all death effects are complete,
+    // then remove it from the array.
   }
 
   /**

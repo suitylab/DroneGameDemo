@@ -938,6 +938,16 @@ export default class UIManager {
   }
 
   /**
+   * Sets the highest unlocked level (synced from LevelManager).
+   * @param level - The highest unlocked level (1-10)
+   */
+  public setMaxUnlockedLevel(level: number): void {
+    if (this.disposed) return;
+    this.maxUnlockedLevel = Math.max(1, Math.min(10, Math.floor(level)));
+    this.saveUnlockedLevel();
+  }
+
+  /**
    * Unlocks the next level after completing the current one.
    * Level 1 is always unlocked; completing a level unlocks the next.
    */

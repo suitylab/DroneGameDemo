@@ -125,17 +125,19 @@ export default class LevelManager {
 
   /**
    * Marks the current level as complete and unlocks the next level.
+   * Only progresses if the current level is the highest unlocked level.
    * @returns True if level 10 was completed (victory), false otherwise
    */
   public completeCurrentLevel(): boolean {
     // Add the current level to completed levels
     this.completedLevels.add(this.currentLevel);
 
-    // Unlock the next level (clamp to 10)
-    this.maxUnlockedLevel = Math.min(10, this.maxUnlockedLevel + 1);
-
-    // Persist to localStorage
-    LevelManager.saveUnlockedLevel(this.maxUnlockedLevel);
+    // Only unlock the next level if this is the highest unlocked level
+    if (this.currentLevel >= this.maxUnlockedLevel) {
+      this.maxUnlockedLevel = Math.min(10, this.maxUnlockedLevel + 1);
+      // Persist to localStorage
+      LevelManager.saveUnlockedLevel(this.maxUnlockedLevel);
+    }
 
     // Return true if level 10 was completed (victory)
     return this.currentLevel === 10;

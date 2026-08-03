@@ -1227,7 +1227,8 @@ export default class Game {
 
           // Complete the level and check for victory
           const isVictory = this.levelManager.completeCurrentLevel();
-          this.uiManager.unlockNextLevel();
+          // Sync UIManager unlock state from LevelManager
+          this.uiManager.setMaxUnlockedLevel(this.levelManager.getMaxUnlockedLevel());
           if (isVictory) {
             this.uiManager.showVictory({
               totalTime: this.levelTime,
@@ -1353,8 +1354,9 @@ export default class Game {
         // Set the current level
     this.level = Math.max(1, Math.min(10, Math.floor(level)));
 
-    // Sync the UIManager's current level
+     // Sync the UIManager's current level and unlock state
     this.uiManager.setCurrentLevel(this.level);
+    this.uiManager.setMaxUnlockedLevel(this.levelManager.getMaxUnlockedLevel());
 
     // Get the level config for this level
     const config = this.levelManager.getCurrentConfig();

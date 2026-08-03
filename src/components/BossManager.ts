@@ -274,9 +274,8 @@ export default class BossManager {
     // Mark as not alive
     this.isAlive = false;
 
-    // Keep a reference to the boss for cleanup, but null the manager's reference
-    // The boss is already removed from the scene by the boss's die() method
-    this.boss = null;
+    // Keep the boss reference alive for death effects cleanup
+    // The boss will be disposed after all death effects complete
 
     // Invoke the external death callback
     this.onBossDeath();
@@ -292,14 +291,24 @@ export default class BossManager {
     // Guard against updates after disposal
     if (this.disposed) return;
 
-    // Skip if no boss or boss is dead
-    if (!this.boss || !this.isAlive) return;
+    // Skip if no boss
+    if (!this.boss) return;
 
-    // Update the boss entity
+    // Update the boss entity (including death effects after death)
     this.boss.update(deltaTime);
 
-    // Update the HUD boss bar
-    this.hud.updateBossBar(this.boss.health, this.boss.maxHealth);
+    // Update the HUD boss bar only if alive
+    if (this.isAlive) {
+      this.hud.updateBossBar(this.boss.health, this.boss.maxHealth);
+    }
+
+    // Dispose boss after all death effects are complete
+    if (!this.isAlive) {
+      if (!this.boss.hasActiveDeathEffects()) {
+        this.boss.dispose();
+        this.boss = null;
+      }
+    }
   }
 
   /**

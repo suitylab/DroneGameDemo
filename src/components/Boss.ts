@@ -1415,6 +1415,19 @@ export default abstract class Boss {
   }
 
   /**
+   * Checks whether the boss has any active death effects.
+   * @returns True if death effects are still playing
+   */
+  public hasActiveDeathEffects(): boolean {
+    return (
+      this.deathParticles.length > 0 ||
+      this.smokeParticles.length > 0 ||
+      this.shockwaveRings.length > 0 ||
+      this.deathLight !== null
+    );
+  }
+
+  /**
    * Removes the boss from the scene and disposes all resources.
    * Safe to call multiple times.
    */

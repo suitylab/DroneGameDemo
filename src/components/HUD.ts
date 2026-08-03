@@ -503,23 +503,26 @@ export default class HUD {
     this.reloadIndicator = document.createElement('div');
     this.reloadIndicator.style.cssText = `
       position: absolute;
-      bottom: 80px;
-      right: 24px;
-      font-size: 14px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 20px;
+      font-weight: bold;
       color: #ff4444;
-      text-shadow: 0 0 6px rgba(255, 68, 68, 0.8), 0 0 12px rgba(255, 68, 68, 0.4);
-      background: rgba(10, 14, 20, 0.85);
-      border: 1px solid rgba(255, 68, 68, 0.5);
-      border-radius: 4px;
-      padding: 8px 14px;
-      letter-spacing: 3px;
+      text-shadow: 0 0 8px rgba(255, 68, 68, 0.9), 0 0 16px rgba(255, 68, 68, 0.6);
+      background: rgba(10, 14, 20, 0.4);
+      border: 1px solid rgba(255, 68, 68, 0.4);
+      border-radius: 8px;
+      padding: 12px 24px;
+      letter-spacing: 4px;
       z-index: 10;
       display: none;
       backdrop-filter: blur(2px);
       -webkit-backdrop-filter: blur(2px);
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      box-shadow: 0 0 15px rgba(255, 68, 68, 0.2);
     `;
 
     // Reload text
@@ -530,11 +533,12 @@ export default class HUD {
     // Progress bar container
     const barContainer = document.createElement('div');
     barContainer.style.cssText = `
-      width: 120px;
-      height: 6px;
+      width: 180px;
+      height: 10px;
       background: rgba(255, 68, 68, 0.2);
-      border-radius: 3px;
+      border-radius: 5px;
       overflow: hidden;
+      border: 1px solid rgba(255, 68, 68, 0.3);
     `;
 
     // Progress bar fill
@@ -542,10 +546,10 @@ export default class HUD {
     this.reloadBarFill.style.cssText = `
       width: 0%;
       height: 100%;
-      background: #ff4444;
-      border-radius: 3px;
+      background: linear-gradient(90deg, #ff4444, #ff6666);
+      border-radius: 5px;
       transition: width 0.05s linear;
-      box-shadow: 0 0 6px rgba(255, 68, 68, 0.6);
+      box-shadow: 0 0 10px rgba(255, 68, 68, 0.8), 0 0 20px rgba(255, 68, 68, 0.4);
     `;
     barContainer.appendChild(this.reloadBarFill);
     this.reloadIndicator.appendChild(barContainer);

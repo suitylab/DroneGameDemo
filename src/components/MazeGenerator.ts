@@ -140,7 +140,7 @@ const CORRIDOR_WIDTH = 3;
 const ROOM_PADDING = 2;
 
 /** Maximum placement attempts per room */
-const MAX_PLACEMENT_ATTEMPTS = 50;
+const MAX_PLACEMENT_ATTEMPTS = 500;
 
 /** Size (width/depth) in grid cells for each room size category */
 const ROOM_DIMENSIONS: Record<RoomSize, { width: number; depth: number }> = {

@@ -22,3 +22,4 @@ pnpm-debug.log*
 # Editor directories and files
 .idea/
 .vscode/
+/.wrangler/state/v3/observability/miniflare-wobs-trace-store
